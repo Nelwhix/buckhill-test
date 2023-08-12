@@ -1,7 +1,7 @@
 version: '3'
 
 networks:
-  appName:
+  petshop-api:
 
 services:
   nginx:
@@ -16,7 +16,7 @@ services:
       - php
       - mysql
     networks:
-      - appName
+      - petshop-api
 
   mysql:
     image: mysql:5.7.22
@@ -28,14 +28,14 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     environment:
-      MYSQL_DATABASE: appName
+      MYSQL_DATABASE: petshop-api
       MYSQL_USER: nelwhix
       MYSQL_PASSWORD: admin
       MYSQL_ROOT_PASSWORD: admin
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     networks:
-      - appName
+      - petshop-api
 
   php:
     build:
@@ -47,7 +47,7 @@ services:
     ports:
       - "9000:9000"
     networks:
-      - appName
+      - petshop-api
   composer:
     image: composer:latest
     container_name: composer
@@ -55,4 +55,4 @@ services:
       - ./app:/var/www/html
     working_dir: /var/www/html
     networks:
-      - appName
+      - petshop-api

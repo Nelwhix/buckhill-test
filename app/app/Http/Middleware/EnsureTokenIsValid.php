@@ -2,8 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
+use App\Services\TokenService;
 use Closure;
 use Illuminate\Http\Request;
+use Lcobucci\JWT\UnencryptedToken;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTokenIsValid
@@ -31,7 +34,28 @@ class EnsureTokenIsValid
         }
 
         $tokenPayload = explode(" ", $authPayLoad);
+        $tokenService = new TokenService();
+        $parsedToken = $tokenService->parseAndValidate($tokenPayload[1], true);
 
+        if ($parsedToken === null) {
+            return response([
+                'status' => 'failed',
+                'message' => 'unauthorized'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+        assert($parsedToken instanceof UnencryptedToken);
+        $userUuid = $parsedToken->claims()->get('user_uuid');
+        $user = User::whereUuid($userUuid)->firstOrFail();
+
+        if ($request->route() !== null) {
+            $routeUri = $request->route()->uri();
+            if (str_contains($routeUri, 'admin') && $user->is_admin != 1) {
+                return response([
+                    'status' => 'failed',
+                    'message' => 'unauthorized'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+        }
 
         return $next($request);
     }

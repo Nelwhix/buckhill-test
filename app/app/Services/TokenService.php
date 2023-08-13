@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\JwtToken;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -27,6 +28,19 @@ use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
 use Lcobucci\JWT\Validation\Validator;
 
 class TokenVO {
+    /**
+     * @OA\Property(
+     *     title="accessToken",
+     *     description="access token string",
+     *     format="string"
+     * )
+     *
+     * @OA\Property(
+     *     title="refreshToken",
+     *     description="refresh token string",
+     *     format="string"
+     * )
+     */
     public function __construct(public string $accessToken, public string $refreshToken){}
 }
 
@@ -41,26 +55,30 @@ class TokenService
         $this->refreshSigner = InMemory::plainText(env('JWT_REFRESH_SECRET_KEY'));
         $this->algo = new Sha256();
     }
-    public function createToken(User $user): TokenVO {
+
+
+    public function createToken(User $user, JwtToken $accessTokenModel, JwtToken $refreshTokenModel): TokenVO {
         $builder = new Builder(new JoseEncoder(), ChainedFormatter::default());
 
-        $now = CarbonImmutable::now();
-        $expiry1 = CarbonImmutable::now()->addMinutes(5);
-        $expiry2 = CarbonImmutable::now()->addDay();
-
+        $iss = CarbonImmutable::parse($accessTokenModel->created_at);
+        $exp = CarbonImmutable::parse($accessTokenModel->expires_at);
         $accessToken = $builder
             ->issuedBy(env('APP_URL'))
-            ->issuedAt($now)
-            ->expiresAt($expiry1)
+            ->issuedAt($iss)
+            ->expiresAt($exp)
             ->withClaim('user_uuid', $user->uuid)
+            ->withClaim('token_uuid', $accessTokenModel->unique_id)
             ->getToken($this->algo, $this->accessSigner)
             ->toString();
 
+        $iss = CarbonImmutable::parse($refreshTokenModel->created_at);
+        $exp = CarbonImmutable::parse($refreshTokenModel->expires_at);
         $refreshToken = $builder
             ->issuedBy(env('APP_URL'))
-            ->issuedAt($now)
-            ->expiresAt($expiry2)
+            ->issuedAt($iss)
+            ->expiresAt($exp)
             ->withClaim('user_uuid', $user->uuid)
+            ->withClaim('token_uuid', $refreshTokenModel->unique_id)
             ->getToken($this->algo, $this->refreshSigner)
             ->toString();
 

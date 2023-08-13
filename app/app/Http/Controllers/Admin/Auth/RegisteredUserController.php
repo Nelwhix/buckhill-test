@@ -7,12 +7,69 @@ use App\Http\Requests\Admin\RegisterRequest;
 use App\Models\JwtToken;
 use App\Models\User;
 use App\Services\TokenService;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class RegisteredUserController extends Controller
 {
-    public function store(RegisterRequest $request): \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/create",
+     *     summary="Create an Admin account",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="first_name",
+     *                     type="string"
+     *                 ),
+     *                 @OA\Property(
+     *                      property="last_name",
+     *                      type="string"
+     *                  ),
+     *                 @OA\Property(
+     *                      property="email",
+     *                      type="string"
+     *                 ),
+     *                 @OA\Property(
+     *                      property="password",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property  (
+     *                      property="password_confirmation",
+     *                      type="string"
+     *                  ),
+     *                   @OA\Property  (
+     *                      property="address",
+     *                      type="string"
+     *                  ),
+     *                  @OA\Property  (
+     *                      property="phone_number",
+     *                      type="string"
+     *                  ),
+     *                 example={"first_name": "Bruno", "last_name": "Isioma", "email": "brunoisioma1@gmail.com", "password": "test123", "password_confirmation": "test123", "address": "Ba sing se", "phone_number": "011111"}
+     *             )
+     *         )
+     *     ),
+     *   @OA\Response(
+     *          response=201,
+     *          description="Register Successfully",
+     *          @OA\JsonContent()
+     *       ),
+
+     *      @OA\Response(
+     *          response=422,
+     *          description="Unprocessable Entity",
+     *          @OA\JsonContent()
+     *       ),
+     *      @OA\Response(response=400, description="Bad request"),
+     *      @OA\Response(response=404, description="Resource Not Found"),
+     * )
+     * )
+     */
+    public function store(RegisterRequest $request): Response
     {
         $formFields = $request->validated();
 
@@ -27,31 +84,24 @@ class RegisteredUserController extends Controller
             'phone_number' => $formFields['phone_number']
         ]);
 
+        $accessTokenModel = JwtToken::createToken($user->id, true);
+        $refreshTokenModel = JwtToken::createToken($user->id, false);
+
         $tService = new TokenService();
-        $token = $tService->createToken($user);
-
-        JwtToken::create([
-            'unique_id' => Str::uuid(),
-            'user_id' => $user->id,
-            'token_title' => 'access token',
-            'expires_at' => now()->addMinutes(5),
-        ]);
-
-        JwtToken::create([
-            'unique_id' => Str::uuid(),
-            'user_id' => $user->id,
-            'token_title' => 'refresh token',
-            'expires_at' => now()->addDay(),
-        ]);
+        $tokens = $tService->createToken($user, $accessTokenModel, $refreshTokenModel);
 
         return response([
             'status' => 'success',
             'message' => 'admin account created successfully!',
             'data' => [
                 ...$user->toArray(),
-                'access_token' => $token->accessToken,
-                'refresh_token' => $token->refreshToken
+                'access_token' => $tokens->accessToken,
+                'refresh_token' => $tokens->refreshToken
             ]
-        ]);
+        ], \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+    }
+
+    private function storeToken() {
+
     }
 }

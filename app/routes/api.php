@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('admin')->group(function () {
-        Route::post('/admin/create', [RegisteredUserController::class, 'store']);
+        Route::post('/create', [RegisteredUserController::class, 'store']);
     });
 
 });

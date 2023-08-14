@@ -5,7 +5,12 @@ networks:
 
 services:
   nginx:
-    image: nginx:stable-alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      args:
+        USER_ID: ${UID}
+        GROUP_ID: ${GID}
     container_name: appserver
     ports:
       - '8088:80'
@@ -17,6 +22,9 @@ services:
       - mysql
     networks:
       - petshop-api
+    environment:
+      UID: ${UID}
+      GID: ${GID}
 
   mysql:
     image: mysql:5.7.22
@@ -41,6 +49,9 @@ services:
     build:
       context: ./php
       dockerfile: Dockerfile
+      args:
+        USER_ID: ${UID}
+        GROUP_ID: ${GID}
     container_name: php-fpm
     volumes:
       - ./app:/var/www/html
@@ -48,6 +59,10 @@ services:
       - "9000:9000"
     networks:
       - petshop-api
+    environment:
+      UID: ${UID}
+      GID: ${GID}
+
   composer:
     image: composer:latest
     container_name: composer

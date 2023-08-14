@@ -14,32 +14,61 @@
     "paths": {
         "/api/v1/admin/create": {
             "post": {
+                "tags": [
+                    "Admin"
+                ],
                 "summary": "Create an Admin account",
                 "operationId": "d3b9a5dff42482b576186dc9ac834f99",
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/x-www-form-urlencoded": {
                             "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "address",
+                                    "phone_number",
+                                    "avatar"
+                                ],
                                 "properties": {
                                     "first_name": {
+                                        "description": "User first name",
                                         "type": "string"
                                     },
                                     "last_name": {
+                                        "description": "User last name",
                                         "type": "string"
                                     },
                                     "email": {
+                                        "description": "User email",
                                         "type": "string"
                                     },
                                     "password": {
+                                        "description": "User password",
                                         "type": "string"
                                     },
                                     "password_confirmation": {
+                                        "description": "Password confirmation",
                                         "type": "string"
                                     },
                                     "address": {
+                                        "description": "User address",
                                         "type": "string"
                                     },
                                     "phone_number": {
+                                        "description": "User phone number",
+                                        "type": "string"
+                                    },
+                                    "avatar": {
+                                        "description": "User profile picture UUID",
+                                        "type": "string"
+                                    },
+                                    "marketing": {
+                                        "description": "marketing",
                                         "type": "string"
                                     }
                                 },
@@ -59,26 +88,19 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Register Successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Register Successfully"
                     },
                     "422": {
-                        "description": "Unprocessable Entity",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Unprocessable Entity"
                     },
                     "400": {
                         "description": "Bad request"
                     },
                     "404": {
                         "description": "Resource Not Found"
+                    },
+                    "500": {
+                        "description": "Server Error"
                     }
                 }
             }

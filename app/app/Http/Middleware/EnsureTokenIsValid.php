@@ -47,14 +47,11 @@ class EnsureTokenIsValid
         $userUuid = $parsedToken->claims()->get('user_uuid');
         $user = User::whereUuid($userUuid)->firstOrFail();
 
-        if ($request->route() !== null) {
-            $routeUri = $request->route()->uri();
-            if (str_contains($routeUri, 'admin') && $user->is_admin != 1) {
-                return response([
-                    'status' => 'failed',
-                    'message' => 'unauthorized'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
+        if ($request->is('admin/*')) {
+            return response([
+                'status' => 'failed',
+                'message' => 'unauthorized'
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         return $next($request);

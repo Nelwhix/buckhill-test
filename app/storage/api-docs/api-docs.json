@@ -17,8 +17,16 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Create an Admin account",
+                "summary": "Create an Admin Account",
                 "operationId": "d3b9a5dff42482b576186dc9ac834f99",
+                "parameters": [
+                    {
+                        "name": "Accept",
+                        "in": "header",
+                        "description": "set to application/json!",
+                        "required": true
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -52,7 +60,7 @@
                                         "type": "string"
                                     },
                                     "password_confirmation": {
-                                        "description": "Password confirmation",
+                                        "description": "User password confirmation",
                                         "type": "string"
                                     },
                                     "address": {
@@ -68,20 +76,11 @@
                                         "type": "string"
                                     },
                                     "marketing": {
-                                        "description": "marketing",
+                                        "description": "marketing preferences",
                                         "type": "string"
                                     }
                                 },
-                                "type": "object",
-                                "example": {
-                                    "first_name": "Bruno",
-                                    "last_name": "Isioma",
-                                    "email": "brunoisioma1@gmail.com",
-                                    "password": "test123",
-                                    "password_confirmation": "test123",
-                                    "address": "Ba sing se",
-                                    "phone_number": "011111"
-                                }
+                                "type": "object"
                             }
                         }
                     }
@@ -91,28 +90,14 @@
                         "description": "Register Successfully"
                     },
                     "422": {
-                        "description": "Unprocessable Entity"
+                        "description": "Unprocessable entity"
                     },
                     "400": {
-                        "description": "Bad request"
-                    },
-                    "404": {
-                        "description": "Resource Not Found"
+                        "description": "Bad Request"
                     },
                     "500": {
                         "description": "Server Error"
                     }
-                }
-            }
-        }
-    },
-    "components": {
-        "headers": {
-            "Accept": {
-                "description": "Accept header",
-                "schema": {
-                    "type": "string",
-                    "default": "application/json"
                 }
             }
         }

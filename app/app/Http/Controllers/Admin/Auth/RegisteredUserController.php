@@ -21,14 +21,14 @@ class RegisteredUserController extends Controller
                 schema: new OA\Schema(required: ["first_name", "last_name", "email", "password", "password_confirmation", "address", "phone_number", "avatar"],
                         properties: [
                             new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string"),
-                            new OA\Property(property: 'first_name', description: "User first name", type: "string")
+                            new OA\Property(property: 'last_name', description: "User last name", type: "string"),
+                            new OA\Property(property: 'email', description: "User email", type: "string"),
+                            new OA\Property(property: 'password', description: "User password", type: "string"),
+                            new OA\Property(property: 'password_confirmation', description: "User password confirmation", type: "string"),
+                            new OA\Property(property: 'address', description: "User address", type: "string"),
+                            new OA\Property(property: 'phone_number', description: "User phone number", type: "string"),
+                            new OA\Property(property: 'avatar', description: "User profile picture UUID", type: "string"),
+                            new OA\Property(property: 'marketing', description: "marketing preferences", type: "string")
                     ]
                 ))),
         tags: ["Admin"],

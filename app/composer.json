@@ -11,7 +11,8 @@
         "laravel/framework": "^10.10",
         "laravel/tinker": "^2.8",
         "lcobucci/clock": "^3.1",
-        "lcobucci/jwt": "^5.0"
+        "lcobucci/jwt": "^5.0",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.13",
@@ -19,11 +20,10 @@
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^7.0",
         "nunomaduro/larastan": "^2.0",
         "nunomaduro/phpinsights": "^2.8",
-        "pestphp/pest": "^2.15",
-        "pestphp/pest-plugin-laravel": "^2.2",
+        "pestphp/pest": "1.23.1",
+        "pestphp/pest-plugin-laravel": "^1.4",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
@@ -35,7 +35,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "PHPUnit\\": "vendor/phpunit/phpunit/src/"
         }
     },
     "scripts": {
@@ -67,9 +68,9 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true,
             "php-http/discovery": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "pestphp/pest-plugin": true
         }
     },
     "minimum-stability": "stable",

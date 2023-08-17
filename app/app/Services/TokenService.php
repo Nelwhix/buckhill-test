@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
@@ -35,7 +36,18 @@ final class TokenService
     private Builder $tokenBuilder;
 
     public function __construct() {
-        $this->jwtSecret = InMemory::plainText(env('JWT_ACCESS_SECRET_KEY'));
+       $config = [
+           "private_key_type" => OPENSSL_KEYTYPE_EC,
+           "curve_name" => "secp256k1"
+       ];
+       $privateKey = openssl_pkey_new($config);
+       $privateKeyDetails = openssl_pkey_get_details($privateKey);
+       $privateKeyPEM =  $privateKeyDetails['key'];
+       file_put_contents(storage_path("app/ecdsa_private.key"), $privateKeyPEM);
+
+//       $publicKey = openssl_pkey_get_details($privateKey)['key'];
+
+        $this->jwtSecret = InMemory::file(storage_path("app/ecdsa_private.key"));
         $this->jwtRefreshSecret = InMemory::plainText(env('JWT_REFRESH_SECRET_KEY'));
         $this->signingAlgorithm = new Sha256();
         $this->tokenBuilder = new Builder(new JoseEncoder(), ChainedFormatter::default());
@@ -56,6 +68,7 @@ final class TokenService
     }
     public function createToken(User $user, JwtToken $accessTokenModel, JwtToken $refreshTokenModel): TokenVO {
         $accessToken = $this->generateToken($accessTokenModel, $user);
+        dd($accessToken);
         $refreshToken = $this->generateToken($refreshTokenModel, $user);
 
         return new TokenVO($accessToken, $refreshToken);

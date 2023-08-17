@@ -1,7 +1,7 @@
 version: '3'
 
 networks:
-  petshop-api:
+  petshopApi:
 
 services:
   nginx:
@@ -9,8 +9,8 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
       args:
-        USER_ID: ${UID}
-        GROUP_ID: ${GID}
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
     container_name: appserver
     ports:
       - '8088:80'
@@ -21,10 +21,10 @@ services:
       - php
       - mysql
     networks:
-      - petshop-api
+      - petshopApi
     environment:
-      UID: ${UID}
-      GID: ${GID}
+      UID: UID
+      GID: GID
 
   mysql:
     image: mysql:5.7.22
@@ -43,31 +43,31 @@ services:
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     networks:
-      - petshop-api
+      - petshopApi
 
   php:
     build:
       context: ./php
       dockerfile: Dockerfile
       args:
-        USER_ID: ${UID}
-        GROUP_ID: ${GID}
-    container_name: php-fpm
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    container_name: app
     volumes:
       - ./app:/var/www/html
     ports:
       - "9000:9000"
     networks:
-      - petshop-api
+      - petshopApi
     environment:
-      UID: ${UID}
-      GID: ${GID}
+      UID: UID
+      GID: GID
 
   composer:
     image: composer:latest
-    container_name: composer
+    container_name: pkgManager
     volumes:
       - ./app:/var/www/html
     working_dir: /var/www/html
     networks:
-      - petshop-api
+      - petshopApi

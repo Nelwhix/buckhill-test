@@ -22,6 +22,7 @@
         "nunomaduro/collision": "^7.0",
         "nunomaduro/larastan": "^2.0",
         "nunomaduro/phpinsights": "^2.8",
+        "pestphp/pest": "^2.14",
         "phpunit/phpunit": "^10.1",
         "spatie/laravel-ignition": "^2.0"
     },
@@ -38,6 +39,7 @@
         }
     },
     "scripts": {
+        "test": "./vendor/bin/pest",
         "larastan": "./vendor/bin/phpstan analyse",
         "insights": "./vendor/bin/phpinsights",
         "post-autoload-dump": [
@@ -60,6 +62,7 @@
         }
     },
     "config": {
+        "process-timeout": 0,
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,

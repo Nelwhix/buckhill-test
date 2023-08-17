@@ -105,5 +105,16 @@
                 }
             }
         }
+    },
+    "components": {
+        "headers": {
+            "Accept": {
+                "description": "Accept header",
+                "schema": {
+                    "type": "string",
+                    "default": "application/json"
+                }
+            }
+        }
     }
 }

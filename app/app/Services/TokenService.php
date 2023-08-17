@@ -27,60 +27,36 @@ use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
 use Lcobucci\JWT\Validation\Validator;
 
-class TokenVO {
-    /**
-     * @OA\Property(
-     *     title="accessToken",
-     *     description="access token string",
-     *     format="string"
-     * )
-     *
-     * @OA\Property(
-     *     title="refreshToken",
-     *     description="refresh token string",
-     *     format="string"
-     * )
-     */
-    public function __construct(public string $accessToken, public string $refreshToken){}
-}
-
-class TokenService
+final class TokenService
 {
-    private InMemory $accessSigner;
-    private InMemory $refreshSigner;
-    private Sha256 $algo;
+    private InMemory $jwtSecret;
+    private InMemory $jwtRefreshSecret;
+    private Sha256 $signingAlgorithm;
+    private Builder $tokenBuilder;
 
     public function __construct() {
-        $this->accessSigner = InMemory::plainText(env('JWT_ACCESS_SECRET_KEY'));
-        $this->refreshSigner = InMemory::plainText(env('JWT_REFRESH_SECRET_KEY'));
-        $this->algo = new Sha256();
+        $this->jwtSecret = InMemory::plainText(env('JWT_ACCESS_SECRET_KEY'));
+        $this->jwtRefreshSecret = InMemory::plainText(env('JWT_REFRESH_SECRET_KEY'));
+        $this->signingAlgorithm = new Sha256();
+        $this->tokenBuilder = new Builder(new JoseEncoder(), ChainedFormatter::default());
     }
 
+    private function generateToken(JwtToken $tokenModel, User $user): string  {
+        $iss = CarbonImmutable::parse($tokenModel->created_at);
+        $exp = CarbonImmutable::parse($tokenModel->expires_at);
 
+        return $this->tokenBuilder
+            ->issuedBy(env('APP_URL'))
+            ->issuedAt($iss)
+            ->expiresAt($exp)
+            ->withClaim('user_uuid', $user->uuid)
+            ->withClaim('token_uuid', $tokenModel->unique_id)
+            ->getToken($this->signingAlgorithm, $this->jwtSecret)
+            ->toString();
+    }
     public function createToken(User $user, JwtToken $accessTokenModel, JwtToken $refreshTokenModel): TokenVO {
-        $builder = new Builder(new JoseEncoder(), ChainedFormatter::default());
-
-        $iss = CarbonImmutable::parse($accessTokenModel->created_at);
-        $exp = CarbonImmutable::parse($accessTokenModel->expires_at);
-        $accessToken = $builder
-            ->issuedBy(env('APP_URL'))
-            ->issuedAt($iss)
-            ->expiresAt($exp)
-            ->withClaim('user_uuid', $user->uuid)
-            ->withClaim('token_uuid', $accessTokenModel->unique_id)
-            ->getToken($this->algo, $this->accessSigner)
-            ->toString();
-
-        $iss = CarbonImmutable::parse($refreshTokenModel->created_at);
-        $exp = CarbonImmutable::parse($refreshTokenModel->expires_at);
-        $refreshToken = $builder
-            ->issuedBy(env('APP_URL'))
-            ->issuedAt($iss)
-            ->expiresAt($exp)
-            ->withClaim('user_uuid', $user->uuid)
-            ->withClaim('token_uuid', $refreshTokenModel->unique_id)
-            ->getToken($this->algo, $this->refreshSigner)
-            ->toString();
+        $accessToken = $this->generateToken($accessTokenModel, $user);
+        $refreshToken = $this->generateToken($refreshTokenModel, $user);
 
         return new TokenVO($accessToken, $refreshToken);
     }
@@ -101,37 +77,37 @@ class TokenService
     }
 
 
-    public function parseAndValidate(string $token, bool $isAccessToken): Token|null {
-        $parsedToken = $this->parseToken($token);
-        if ($parsedToken === null) {
-            return null;
-        }
-
-        $validator = new Validator();
-        $clock = new SystemClock(new \DateTimeZone(env("APP_TIMEZONE")));
-
-        try {
-            $validator->assert($parsedToken, new IssuedBy(env('APP_URL')));
-            if ($isAccessToken) {
-                $interval = CarbonInterval::minutes('5');
-                $validator->assert($parsedToken, new SignedWith($this->algo, $this->accessSigner));
-            } else {
-                $interval = CarbonInterval::day();
-                $validator->assert($parsedToken, new SignedWith($this->algo, $this->refreshSigner));
-            }
-            $validator->assert($parsedToken, new StrictValidAt($clock, $interval));
-
-        } catch (RequiredConstraintsViolated $e) {
-            Log::error($e->violations());
-            return null;
-        }
-        assert($parsedToken instanceof UnencryptedToken);
-        $userUuid = $parsedToken->claims()->get('user_uuid');
-        if ($userUuid === null || strlen($userUuid) !== 36) {
-            return null;
-        }
-
-
-        return $parsedToken;
-    }
+//    public function parseAndValidate(string $token, bool $isAccessToken): Token|null {
+//        $parsedToken = $this->parseToken($token);
+//        if ($parsedToken === null) {
+//            return null;
+//        }
+//
+//        $validator = new Validator();
+//        $clock = new SystemClock(new \DateTimeZone(env("APP_TIMEZONE")));
+//
+//        try {
+//            $validator->assert($parsedToken, new IssuedBy(env('APP_URL')));
+//            if ($isAccessToken) {
+//                $interval = CarbonInterval::minutes('5');
+//                $validator->assert($parsedToken, new SignedWith($this->algo, $this->accessSigner));
+//            } else {
+//                $interval = CarbonInterval::day();
+//                $validator->assert($parsedToken, new SignedWith($this->algo, $this->refreshSigner));
+//            }
+//            $validator->assert($parsedToken, new StrictValidAt($clock, $interval));
+//
+//        } catch (RequiredConstraintsViolated $e) {
+//            Log::error($e->violations());
+//            return null;
+//        }
+//        assert($parsedToken instanceof UnencryptedToken);
+//        $userUuid = $parsedToken->claims()->get('user_uuid');
+//        if ($userUuid === null || strlen($userUuid) !== 36) {
+//            return null;
+//        }
+//
+//
+//        return $parsedToken;
+//    }
 }

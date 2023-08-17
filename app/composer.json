@@ -22,8 +22,8 @@
         "nunomaduro/collision": "^7.0",
         "nunomaduro/larastan": "^2.0",
         "nunomaduro/phpinsights": "^2.8",
-        "pestphp/pest": "^2.14",
-        "phpunit/phpunit": "^10.1",
+        "pestphp/pest": "^2.15",
+        "pestphp/pest-plugin-laravel": "^2.2",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {

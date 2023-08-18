@@ -10,10 +10,11 @@ use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Lcobucci\Clock\SystemClock;
+use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
 use Lcobucci\JWT\Encoding\JoseEncoder;
-use Lcobucci\JWT\Signer\Ecdsa\Sha256;
+use Lcobucci\JWT\Signer;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Token\Builder;
@@ -36,21 +37,13 @@ final class TokenService
     private Builder $tokenBuilder;
 
     public function __construct() {
-       $config = [
-           "private_key_type" => OPENSSL_KEYTYPE_EC,
-           "curve_name" => "secp256k1"
-       ];
-       $privateKey = openssl_pkey_new($config);
-       $privateKeyDetails = openssl_pkey_get_details($privateKey);
-       $privateKeyPEM =  $privateKeyDetails['key'];
-       file_put_contents(storage_path("app/ecdsa_private.key"), $privateKeyPEM);
+       $config = Configuration::forAsymmetricSigner(
+           new Signer\Rsa\Sha256(),
+           InMemory::file(storage_path('app/private_key.pem')),
+           InMemory::base64Encoded(env('JWT_ACCESS_PUBLIC_KEY'))
+       );
 
-//       $publicKey = openssl_pkey_get_details($privateKey)['key'];
-
-        $this->jwtSecret = InMemory::file(storage_path("app/ecdsa_private.key"));
-        $this->jwtRefreshSecret = InMemory::plainText(env('JWT_REFRESH_SECRET_KEY'));
-        $this->signingAlgorithm = new Sha256();
-        $this->tokenBuilder = new Builder(new JoseEncoder(), ChainedFormatter::default());
+       $this->tokenBuilder = $config->builder(ChainedFormatter::default());
     }
 
     private function generateToken(JwtToken $tokenModel, User $user): string  {

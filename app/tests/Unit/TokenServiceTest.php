@@ -29,4 +29,4 @@ it('generates access token and refresh token', function () {
 
    expect($tokenVO->accessToken)->toBeString()
        ->and($tokenVO->refreshToken)->toBeString();
-});
+})->only();

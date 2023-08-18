@@ -15,6 +15,7 @@ use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Signer;
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Token\Builder;
@@ -31,9 +32,8 @@ use Lcobucci\JWT\Validation\Validator;
 
 final class TokenService
 {
-    private InMemory $jwtSecret;
-    private InMemory $jwtRefreshSecret;
-    private Sha256 $signingAlgorithm;
+    private Key $signingKey;
+    private Signer $signer;
     private Builder $tokenBuilder;
 
     public function __construct() {
@@ -43,7 +43,9 @@ final class TokenService
            InMemory::base64Encoded(env('JWT_ACCESS_PUBLIC_KEY'))
        );
 
+       $this->signer = $config->signer();
        $this->tokenBuilder = $config->builder(ChainedFormatter::default());
+       $this->signingKey = $config->signingKey();
     }
 
     private function generateToken(JwtToken $tokenModel, User $user): string  {
@@ -56,12 +58,11 @@ final class TokenService
             ->expiresAt($exp)
             ->withClaim('user_uuid', $user->uuid)
             ->withClaim('token_uuid', $tokenModel->unique_id)
-            ->getToken($this->signingAlgorithm, $this->jwtSecret)
+            ->getToken($this->signer, $this->signingKey)
             ->toString();
     }
     public function createToken(User $user, JwtToken $accessTokenModel, JwtToken $refreshTokenModel): TokenVO {
         $accessToken = $this->generateToken($accessTokenModel, $user);
-        dd($accessToken);
         $refreshToken = $this->generateToken($refreshTokenModel, $user);
 
         return new TokenVO($accessToken, $refreshToken);

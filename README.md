@@ -62,7 +62,7 @@ then you can start docker
 ```bash
     docker compose run php php artisan test
 ```
-- Truncate and reseed Db cron is at app/Console/Kernel.php or 
+- Truncate and reseed Db cron is at app/app/Console/Kernel.php or 
 you can test with
 ```bash
     docker compose run php php artisan db:truncate-reseed

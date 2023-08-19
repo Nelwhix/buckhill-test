@@ -23,7 +23,7 @@ class GenerateJWT extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $config = array(
             "private_key_bits" => 2048,
@@ -31,10 +31,18 @@ class GenerateJWT extends Command
         );
 
         $privateKey = openssl_pkey_new($config);
+        if ($privateKey === false) {
+            $this->error('could not generate private key');
+            return;
+        }
         openssl_pkey_export($privateKey, $privateKeyPem);
         file_put_contents('storage/app/private_key.pem', $privateKeyPem);
 
         $publicKeyDetails = openssl_pkey_get_details($privateKey);
+        if ($publicKeyDetails === false) {
+            $this->error('could not generate public key');
+            return;
+        }
         $publicKeyPem = $publicKeyDetails['key'];
         file_put_contents('storage/app/public_key.pem', $publicKeyPem);
 

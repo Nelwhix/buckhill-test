@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\TokenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Lcobucci\JWT\UnencryptedToken;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -55,8 +56,8 @@ class AuthenticatedSessionController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $accessTokenModel = JwtToken::createToken($user->id, true);
-        $refreshTokenModel = JwtToken::createToken($user->id, false);
+        $accessTokenModel = JwtToken::createToken((string) $user->id, true);
+        $refreshTokenModel = JwtToken::createToken((string) $user->id, false);
         $tokenVO = $this->tokenService->createToken($user, $accessTokenModel, $refreshTokenModel);
 
         $user->last_login_at = now();
@@ -90,8 +91,21 @@ class AuthenticatedSessionController extends Controller
     )]
     public function destroy(Request $request): \Illuminate\Http\Response
     {
+        if ($request->bearerToken() === null) {
+            return response([
+                'status' => 'failed',
+                'message' => 'unauthorized'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
         $tokenMetadata = $this->tokenService->getTokenMetadata($request->bearerToken(), true);
-        $tokenModel = JwtToken::whereUniqueId($tokenMetadata->claims()->get('token_uuid'))->first();
+        if ($tokenMetadata === null) {
+            return response([
+                'status' => 'failed',
+                'message' => 'unauthorized'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+        assert($tokenMetadata instanceof UnencryptedToken);
+        $tokenModel = JwtToken::whereUniqueId($tokenMetadata->claims()->get('token_uuid'))->firstOrFail();
         $tokenModel->delete();
 
         return response([

@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Models\JwtToken;
 use App\Models\User;
 use Carbon\CarbonImmutable;
-use Carbon\CarbonInterval;
-use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
 use Lcobucci\JWT\Signer;
@@ -16,8 +14,7 @@ use Lcobucci\JWT\Token;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
-use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Lcobucci\JWT\Validation\Validator;
+
 
 final class TokenService
 {
@@ -26,7 +23,7 @@ final class TokenService
     private Signer $signer;
     private \Lcobucci\JWT\Builder $tokenBuilder;
     private \Lcobucci\JWT\Parser $parser;
-    private Validator $validator;
+    private \Lcobucci\JWT\Validator $validator;
 
     public function __construct() {
         $privateKeyPath = storage_path('app/private_key.pem');
@@ -77,35 +74,39 @@ final class TokenService
         return $this->parser->parse($token);
     }
 
-    private function validateToken(Token $parsedToken, bool $isAccessToken): bool {
-        if (!$this->validator->validate($parsedToken, new IssuedBy(env('APP_URL')))) {
-            return false;
-        }
+    private function validateTokenConstraints(Token $parsedToken): bool
+    {
+        return $this->validator->validate($parsedToken, new IssuedBy(env('APP_URL')))
+            && $this->validator->validate($parsedToken, new SignedWith($this->signer, $this->verifier));
+    }
 
-        if (!$this->validator->validate($parsedToken, new SignedWith($this->signer, $this->verifier))) {
-            return false;
-        }
-
+    private function validateExpiration(Token $parsedToken): bool
+    {
+        assert($parsedToken instanceof UnencryptedToken);
         $exp = $parsedToken->claims()->get('exp');
-        if (!($exp instanceof \DateTimeImmutable)) {
-            return false;
-        }
-        if (now()->gt($exp)) {
+        return $exp instanceof \DateTimeImmutable && now()->lt($exp);
+    }
+
+    private function validateUuidClaim(mixed $claim): bool
+    {
+        return is_string($claim) && strlen($claim) === 36;
+    }
+
+    private function validateToken(Token $parsedToken, bool $isAccessToken): bool
+    {
+        if (!$this->validateTokenConstraints($parsedToken)) {
             return false;
         }
 
+        if (!$this->validateExpiration($parsedToken)) {
+            return false;
+        }
+
+        assert($parsedToken instanceof UnencryptedToken);
         $userUuid = $parsedToken->claims()->get('user_uuid');
-        if ($userUuid === null || strlen($userUuid) !== 36) {
-            return false;
-        }
-
         $tokenUuid = $parsedToken->claims()->get("token_uuid");
-        if ($tokenUuid === null || strlen($tokenUuid) !== 36) {
-            return false;
-        }
 
-
-        return true;
+        return $this->validateUuidClaim($userUuid) && $this->validateUuidClaim($tokenUuid);
     }
 
     public function getTokenMetadata(string $token, bool $isAccessToken): Token|null {

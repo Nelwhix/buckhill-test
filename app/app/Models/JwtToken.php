@@ -25,14 +25,11 @@ class JwtToken extends Model
     }
 
     public static function createToken(string $userId, bool $isAccessToken ): self {
-        $token_uuid = (string) Str::uuid();
-        $expiry = $isAccessToken ? now()->addMinutes(5) : now()->addDay();
-
         return self::create([
-            'unique_id' => $token_uuid,
+            'unique_id' => (string) Str::uuid(),
             'user_id' => $userId,
             'token_title' => $isAccessToken ? 'access token' : 'refresh token',
-            'expires_at' => $expiry,
+            'expires_at' =>  $isAccessToken ? now()->addMinutes(5) : now()->addDay(),
         ]);
     }
 }

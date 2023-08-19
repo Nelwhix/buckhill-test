@@ -9,7 +9,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
-use phpDocumentor\Reflection\DocBlock\Tags\Property;
 
 class RegisteredUserController extends Controller
 {
@@ -60,7 +59,7 @@ class RegisteredUserController extends Controller
             'status' => 'success',
             'message' => 'admin account created successfully!',
             'data' => [
-                ...$user->toArray(),
+               'user' => $user,
             ]
         ], \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }

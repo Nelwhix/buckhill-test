@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminSeeder extends Seeder
@@ -20,7 +21,7 @@ class AdminSeeder extends Seeder
             'last_name' => 'buckhill',
             'is_admin' => 1,
             'email' => 'admin@buckhill.co.uk',
-            'password' => 'admin',
+            'password' => Hash::make('admin'),
             'address' => 'Remetinečka cesta 13, 10000, Zagreb, Croatia',
             'phone_number' => '+385 1 4663 719',
         ]);

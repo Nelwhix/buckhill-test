@@ -32,7 +32,7 @@ class TruncateDbAndReseed extends Command
         Artisan::call('migrate:fresh');
 
         foreach($users as $user) {
-            if ($user->is_admin === 1) {
+            if ($user->email === 'admin@buckhill.co.uk') {
                     User::factory()->createOne($user->toArray());
                     continue;
             }

@@ -21,7 +21,9 @@ My submission for the coding task
 ```
 
 - Start Docker network, nginx is on port 8088, php on 9000 and mysql
-on 4306, you can edit this by running 
+on 4306, you can edit manually in the `docker-compose.yaml` or if you have
+'sed' cli installed(installed by default on most Unix-based systems)
+run 
 ```bash
     sed -i 's/8088/${desired_nginx_port}/g; s/9000:9000/${desired_php_port}:9000/g; s/4306/${desired_php_port/g' docker-compose.yaml
     
@@ -41,7 +43,7 @@ then you can start docker
 
 - Generate JWT SECRET
 ```bash
-    openssl genpkey -algorithm RSA -out app/storage/app/private_key.pem
+   docker compose run php php artisan jwt:generate
 ```
 
 - Generate App key
@@ -60,6 +62,12 @@ then you can start docker
 ```bash
     docker compose run php php artisan test
 ```
+- Truncate and reseed Db cron is at app/Console/Kernel.php or 
+you can test with
+```bash
+    docker compose run php php artisan db:truncate-reseed
+```
+
 - Larastan is set at Level 8:
 ```bash
     docker compose run composer composer larastan 

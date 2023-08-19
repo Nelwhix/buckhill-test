@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Lcobucci\JWT\UnencryptedToken;
+
 final class TokenVO {
-    public function __construct(public string $accessToken, public string $refreshToken){}
+    public function __construct(public UnencryptedToken $accessToken, public UnencryptedToken $refreshToken){}
 }

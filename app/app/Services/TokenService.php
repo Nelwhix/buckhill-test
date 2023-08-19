@@ -1,54 +1,55 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Services;
 
 use App\Models\JwtToken;
 use App\Models\User;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterval;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
-use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Signer;
 use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token;
-use Lcobucci\JWT\Token\Builder;
-use Lcobucci\JWT\Token\InvalidTokenStructure;
-use Lcobucci\JWT\Token\Parser;
-use Lcobucci\JWT\Token\UnsupportedHeaderFound;
 use Lcobucci\JWT\UnencryptedToken;
-use Lcobucci\JWT\Validation\Constraint\HasClaimWithValue;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
 use Lcobucci\JWT\Validation\Validator;
 
 final class TokenService
 {
     private Key $signingKey;
+    private Key $verifier;
     private Signer $signer;
-    private Builder $tokenBuilder;
+    private \Lcobucci\JWT\Builder $tokenBuilder;
+    private \Lcobucci\JWT\Parser $parser;
+    private Validator $validator;
 
     public function __construct() {
+        $privateKeyPath = storage_path('app/private_key.pem');
+        $publicKeyPath = storage_path('app/public_key.pem');
+        if ($privateKeyPath === "" || $publicKeyPath === "") {
+            throw new \Exception("Could not create Token Service instance");
+        }
        $config = Configuration::forAsymmetricSigner(
            new Signer\Rsa\Sha256(),
-           InMemory::file(storage_path('app/private_key.pem')),
-           InMemory::base64Encoded(env('JWT_ACCESS_PUBLIC_KEY'))
+           InMemory::file($privateKeyPath),
+           InMemory::file($publicKeyPath)
        );
 
        $this->signer = $config->signer();
        $this->tokenBuilder = $config->builder(ChainedFormatter::default());
        $this->signingKey = $config->signingKey();
+       $this->parser = $config->parser();
+       $this->validator = $config->validator();
+       $this->verifier = $config->verificationKey();
     }
 
-    private function generateToken(JwtToken $tokenModel, User $user): string  {
+    private function generateToken(JwtToken $tokenModel, User $user): UnencryptedToken
+    {
         $iss = CarbonImmutable::parse($tokenModel->created_at);
         $exp = CarbonImmutable::parse($tokenModel->expires_at);
 
@@ -58,8 +59,8 @@ final class TokenService
             ->expiresAt($exp)
             ->withClaim('user_uuid', $user->uuid)
             ->withClaim('token_uuid', $tokenModel->unique_id)
-            ->getToken($this->signer, $this->signingKey)
-            ->toString();
+            ->getToken($this->signer, $this->signingKey);
+
     }
     public function createToken(User $user, JwtToken $accessTokenModel, JwtToken $refreshTokenModel): TokenVO {
         $accessToken = $this->generateToken($accessTokenModel, $user);
@@ -68,53 +69,58 @@ final class TokenService
         return new TokenVO($accessToken, $refreshToken);
     }
 
-    private function parseToken(string $token): Token|null {
-        $parser = new Parser(new JoseEncoder());
+    private function parseToken(string $token): Token {
+        if ($token === "") {
+            throw new \Exception("no token passed");
+        };
 
+        return $this->parser->parse($token);
+    }
+
+    private function validateToken(Token $parsedToken, bool $isAccessToken): bool {
+        if (!$this->validator->validate($parsedToken, new IssuedBy(env('APP_URL')))) {
+            return false;
+        }
+
+        if (!$this->validator->validate($parsedToken, new SignedWith($this->signer, $this->verifier))) {
+            return false;
+        }
+
+        $exp = $parsedToken->claims()->get('exp');
+        if (!($exp instanceof \DateTimeImmutable)) {
+            return false;
+        }
+        if (now()->gt($exp)) {
+            return false;
+        }
+
+        $userUuid = $parsedToken->claims()->get('user_uuid');
+        if ($userUuid === null || strlen($userUuid) !== 36) {
+            return false;
+        }
+
+        $tokenUuid = $parsedToken->claims()->get("token_uuid");
+        if ($tokenUuid === null || strlen($tokenUuid) !== 36) {
+            return false;
+        }
+
+
+        return true;
+    }
+
+    public function getTokenMetadata(string $token, bool $isAccessToken): Token|null {
         try {
-            if ($token == "") return null;
-
-            $parsedToken = $parser->parse($token);
-        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
-            Log::error($e->getMessage());
+            $parsedToken = $this->parseToken($token);
+        } catch (\Exception $e) {
             return null;
         }
 
+        $tokenIsValid = $this->validateToken($parsedToken, $isAccessToken);
+        if (!$tokenIsValid) {
+            return null;
+        }
+
+
         return $parsedToken;
     }
-
-
-//    public function parseAndValidate(string $token, bool $isAccessToken): Token|null {
-//        $parsedToken = $this->parseToken($token);
-//        if ($parsedToken === null) {
-//            return null;
-//        }
-//
-//        $validator = new Validator();
-//        $clock = new SystemClock(new \DateTimeZone(env("APP_TIMEZONE")));
-//
-//        try {
-//            $validator->assert($parsedToken, new IssuedBy(env('APP_URL')));
-//            if ($isAccessToken) {
-//                $interval = CarbonInterval::minutes('5');
-//                $validator->assert($parsedToken, new SignedWith($this->algo, $this->accessSigner));
-//            } else {
-//                $interval = CarbonInterval::day();
-//                $validator->assert($parsedToken, new SignedWith($this->algo, $this->refreshSigner));
-//            }
-//            $validator->assert($parsedToken, new StrictValidAt($clock, $interval));
-//
-//        } catch (RequiredConstraintsViolated $e) {
-//            Log::error($e->violations());
-//            return null;
-//        }
-//        assert($parsedToken instanceof UnencryptedToken);
-//        $userUuid = $parsedToken->claims()->get('user_uuid');
-//        if ($userUuid === null || strlen($userUuid) !== 36) {
-//            return null;
-//        }
-//
-//
-//        return $parsedToken;
-//    }
 }

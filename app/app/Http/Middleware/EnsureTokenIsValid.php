@@ -2,15 +2,21 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\JwtToken;
 use App\Models\User;
 use App\Services\TokenService;
 use Closure;
 use Illuminate\Http\Request;
+use Lcobucci\JWT\JwtFacade;
 use Lcobucci\JWT\UnencryptedToken;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTokenIsValid
 {
+    public function __construct(protected TokenService $tokenService)
+    {
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -18,24 +24,13 @@ class EnsureTokenIsValid
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $authPayLoad = $request->Header('Authorization');
-        if ($authPayLoad === null) {
+        if ($request->bearerToken() === null) {
             return response([
                 'status' => 'failed',
                 'message' => 'unauthorized'
             ], Response::HTTP_UNAUTHORIZED);
         }
-
-        if (trim($authPayLoad) === "") {
-            return response([
-                'status' => 'failed',
-                'message' => 'unauthorized'
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        $tokenPayload = explode(" ", $authPayLoad);
-        $tokenService = new TokenService();
-        $parsedToken = $tokenService->parseAndValidate($tokenPayload[1], true);
+        $parsedToken = $this->tokenService->getTokenMetadata($request->bearerToken(), true);
 
         if ($parsedToken === null) {
             return response([
@@ -45,9 +40,13 @@ class EnsureTokenIsValid
         }
         assert($parsedToken instanceof UnencryptedToken);
         $userUuid = $parsedToken->claims()->get('user_uuid');
-        $user = User::whereUuid($userUuid)->firstOrFail();
+        $tokenUuid = $parsedToken->claims()->get('token_uuid');
+        $user = User::where('uuid', $userUuid)->firstOrFail();
+        $tokenModel = JwtToken::whereUniqueId($tokenUuid)->firstOrFail();
+        $tokenModel->last_used_at = now();
+        $tokenModel->save();
 
-        if ($request->is('admin/*')) {
+        if ($request->is('admin/*') && $user->is_admin === 0) {
             return response([
                 'status' => 'failed',
                 'message' => 'unauthorized'

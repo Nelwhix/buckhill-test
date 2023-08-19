@@ -25,7 +25,7 @@ test('user with bad credentials cannot login', function () {
     ])->assertStatus(Response::HTTP_BAD_REQUEST);
 });
 
-test('admin account can login', function () {
+it('can login an admin account', function () {
     $this->seed(AdminSeeder::class);
 
     $this->post('/api/v1/admin/login', [
@@ -33,4 +33,19 @@ test('admin account can login', function () {
         'password' => 'admin'
     ])->assertStatus(Response::HTTP_OK);
     $this->assertDatabaseCount('jwt_tokens', 2);
-})->only();
+});
+
+it('logs out an admin account', function () {
+    $this->seed(AdminSeeder::class);
+
+    $response = $this->post('/api/v1/admin/login', [
+        'email' => 'admin@buckhill.co.uk',
+        'password' => 'admin'
+    ])->json();
+
+    $token = $response['data']['access_token'];
+
+    $this->withHeaders([
+      'Authorization' => "Bearer $token"
+    ])->get('/api/v1/admin/logout')->assertStatus(Response::HTTP_OK);
+});

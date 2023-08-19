@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\LoginRequest;
 use App\Models\JwtToken;
 use App\Models\User;
 use App\Services\TokenService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
@@ -28,10 +29,10 @@ class AuthenticatedSessionController extends Controller
                 ))),
         tags: ["Admin"],
         responses: [
-            new OA\Response(response: 200, description: "login success"),
-            new OA\Response(response: 422, description: "Unprocessable entity"),
-            new OA\Response(response: 400, description: "Bad Request"),
-            new OA\Response(response: 500, description: "Server Error")
+            new OA\Response(response: Response::HTTP_OK, description: "login success"),
+            new OA\Response(response: Response::HTTP_UNPROCESSABLE_ENTITY, description: "Unprocessable entity"),
+            new OA\Response(response: Response::HTTP_BAD_REQUEST, description: "Bad Request"),
+            new OA\Response(response: Response::HTTP_INTERNAL_SERVER_ERROR, description: "Server Error")
         ]
     )]
     public function store(LoginRequest $request): \Illuminate\Http\Response
@@ -40,7 +41,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = User::where('email', $formFields['email'])->firstOrFail();
 
-        if (!Hash::check(trim($formFields['password']), $user->password)) {
+        if (!Hash::check($formFields['password'], $user->password)) {
             return response([
                 'status' => 'failed',
                 'message' => 'invalid credentials'
@@ -66,6 +67,33 @@ class AuthenticatedSessionController extends Controller
                 'refresh_token' => $tokenVO->accessToken->toString(),
                 'user' => $user
             ]
+        ]);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/admin/logout",
+        summary: "Logout an Admin Account",
+        security: [
+            [
+                'bearerAuth' => []
+            ]
+        ],
+        tags: ["Admin"],
+        responses: [
+            new OA\Response(response: Response::HTTP_OK, description: "logout success"),
+            new OA\Response(response: Response::HTTP_UNAUTHORIZED, description: "Unauthorized"),
+            new OA\Response(response: Response::HTTP_INTERNAL_SERVER_ERROR, description: "Server Error")
+        ]
+    )]
+    public function destroy(Request $request): \Illuminate\Http\Response
+    {
+        $tokenMetadata = $this->tokenService->getTokenMetadata($request->bearerToken(), true);
+        $tokenModel = JwtToken::whereUniqueId($tokenMetadata->claims()->get('token_uuid'))->first();
+        $tokenModel->delete();
+
+        return response([
+            'status' => 'success',
+            'message' => 'tokens revoked successfully'
         ]);
     }
 }

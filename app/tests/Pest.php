@@ -3,6 +3,7 @@
 use App\Models\JwtToken;
 use App\Models\User;
 use App\Services\TokenService;
+use Database\Seeders\AdminSeeder;
 
 uses(
     Tests\TestCase::class,
@@ -28,3 +29,10 @@ function generateTestTokens(): \App\Services\TokenVO
 
     return $tokenService->createToken($user, $accessTokenModel, $refreshTokenModel);
 }
+
+//function adminUser() {
+//    test()->seed(AdminSeeder::class);
+//    $user = User::where('email', 'admin@buckhill.co.uk')->first();
+//
+//    return test()->actingAs($user);
+//}

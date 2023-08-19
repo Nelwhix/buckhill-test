@@ -12,6 +12,78 @@
         }
     ],
     "paths": {
+        "/api/v1/admin/login": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Login an Admin Account",
+                "operationId": "4931b9990f7916503d25380451ac7a4b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "User email",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "User password",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "login success"
+                    },
+                    "422": {
+                        "description": "Unprocessable entity"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/logout": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Logout an Admin Account",
+                "operationId": "ff05cade181f24499fbea8b103a25c85",
+                "responses": {
+                    "200": {
+                        "description": "logout success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/create": {
             "post": {
                 "tags": [
@@ -93,66 +165,22 @@
                 }
             }
         },
-        "/api/v1/admin/login": {
-            "post": {
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Login an Admin Account",
-                "operationId": "2286d75913a282290dc8bad52b179f67",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "description": "User email",
-                                        "type": "string"
-                                    },
-                                    "password": {
-                                        "description": "User password",
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "login success"
-                    },
-                    "422": {
-                        "description": "Unprocessable entity"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Server Error"
-                    }
-                }
-            }
-        },
-        "/api/v1/admin/logout": {
+        "/api/v1/admin/user-listing": {
             "get": {
                 "tags": [
                     "Admin"
                 ],
-                "summary": "Logout an Admin Account",
-                "operationId": "364e0ee6217385ff1be854ebe26d1965",
+                "summary": "List all non-admin users",
+                "operationId": "40accb1e31c8f8b7ad5c702f48181bca",
                 "responses": {
                     "200": {
-                        "description": "logout success"
+                        "description": "users retrieved success"
                     },
                     "401": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "not found"
                     },
                     "500": {
                         "description": "Server Error"

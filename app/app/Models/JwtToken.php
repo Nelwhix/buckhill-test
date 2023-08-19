@@ -29,7 +29,7 @@ class JwtToken extends Model
             'unique_id' => (string) Str::uuid(),
             'user_id' => $userId,
             'token_title' => $isAccessToken ? 'access token' : 'refresh token',
-            'expires_at' =>  $isAccessToken ? now()->addMinutes(15) : now()->addDay(),
+            'expires_at' =>  $isAccessToken ? now()->addMinutes(60) : now()->addDay(),
         ]);
     }
 }

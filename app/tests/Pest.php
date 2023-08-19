@@ -30,9 +30,13 @@ function generateTestTokens(): \App\Services\TokenVO
     return $tokenService->createToken($user, $accessTokenModel, $refreshTokenModel);
 }
 
-//function adminUser() {
-//    test()->seed(AdminSeeder::class);
-//    $user = User::where('email', 'admin@buckhill.co.uk')->first();
-//
-//    return test()->actingAs($user);
-//}
+function getAdminToken(): string {
+    test()->seed(AdminSeeder::class);
+
+    $response = test()->post('/api/v1/admin/login', [
+        'email' => 'admin@buckhill.co.uk',
+        'password' => 'admin'
+    ])->json();
+
+    return $response['data']['access_token'];
+}

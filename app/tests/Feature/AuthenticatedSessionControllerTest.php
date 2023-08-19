@@ -36,14 +36,7 @@ it('can login an admin account', function () {
 });
 
 it('logs out an admin account', function () {
-    $this->seed(AdminSeeder::class);
-
-    $response = $this->post('/api/v1/admin/login', [
-        'email' => 'admin@buckhill.co.uk',
-        'password' => 'admin'
-    ])->json();
-
-    $token = $response['data']['access_token'];
+    $token = getAdminToken();
 
     $this->withHeaders([
       'Authorization' => "Bearer $token"

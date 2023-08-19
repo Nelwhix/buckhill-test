@@ -192,6 +192,153 @@
                     }
                 ]
             }
+        },
+        "/api/v1/admin/user-edit/{uuid} ": {
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Edit a non-admin User account",
+                "operationId": "4301b2893fc85e55697e90ef8f8f7a08",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "user's uuid",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "address",
+                                    "phone_number"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "description": "User first name",
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "description": "User last name",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "description": "User email",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "User password",
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "User password confirmation",
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "description": "User address",
+                                        "type": "string"
+                                    },
+                                    "phone_number": {
+                                        "description": "User phone number",
+                                        "type": "string"
+                                    },
+                                    "avatar": {
+                                        "description": "User profile picture UUID",
+                                        "type": "string"
+                                    },
+                                    "marketing": {
+                                        "description": "marketing preferences",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated Successfully"
+                    },
+                    "422": {
+                        "description": "Unprocessable entity"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "403": {
+                        "description": "action not allowed"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/user-delete/{uuid} ": {
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Delete a non-admin User account",
+                "operationId": "cbf3a6e8a62a9c2ccf48eead5600df67",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "user's uuid",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted Successfully"
+                    },
+                    "422": {
+                        "description": "Unprocessable entity"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "403": {
+                        "description": "action not allowed"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {

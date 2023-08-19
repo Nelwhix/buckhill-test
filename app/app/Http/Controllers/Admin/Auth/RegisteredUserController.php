@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class RegisteredUserController extends Controller
 {
@@ -32,10 +33,10 @@ class RegisteredUserController extends Controller
                 ))),
         tags: ["Admin"],
         responses: [
-            new OA\Response(response: 201, description: "Register Successfully"),
-            new OA\Response(response: 422, description: "Unprocessable entity"),
-            new OA\Response(response: 400, description: "Bad Request"),
-            new OA\Response(response: 500, description: "Server Error")
+            new OA\Response(response: ResponseAlias::HTTP_CREATED, description: "Register Successfully"),
+            new OA\Response(response: ResponseAlias::HTTP_UNPROCESSABLE_ENTITY, description: "Unprocessable entity"),
+            new OA\Response(response: ResponseAlias::HTTP_BAD_REQUEST, description: "Bad Request"),
+            new OA\Response(response: ResponseAlias::HTTP_INTERNAL_SERVER_ERROR, description: "Server Error")
         ]
     )]
     public function store(RegisterRequest $request): Response

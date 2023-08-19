@@ -59,6 +59,9 @@ class AuthenticatedSessionController extends Controller
         $refreshTokenModel = JwtToken::createToken($user->id, false);
         $tokenVO = $this->tokenService->createToken($user, $accessTokenModel, $refreshTokenModel);
 
+        $user->last_login_at = now();
+        $user->save();
+
         return response([
             'status' => 'success',
             'message' => 'login success',

@@ -49,9 +49,9 @@ class UserController extends Controller
                 'bearerAuth' => []
             ]
         ],
-        requestBody: new OA\RequestBody(required: true,
+        requestBody: new OA\RequestBody(
             content: new OA\MediaType(mediaType: "application/x-www-form-urlencoded",
-                schema: new OA\Schema(required: ["first_name", "last_name", "email", "password", "password_confirmation", "address", "phone_number"],
+                schema: new OA\Schema(
                     properties: [
                         new OA\Property(property: 'first_name', description: "User first name", type: "string"),
                         new OA\Property(property: 'last_name', description: "User last name", type: "string"),

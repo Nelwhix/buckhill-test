@@ -1,0 +1,22 @@
+{
+    "name": "nelwhix/currency-exchange",
+    "description": "a package to convert from euros to other currencies on the ECB",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Nelwhix\\CurrencyExchange\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nelson Isioma",
+            "email": "nelsonisioma1@gmail.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "^10.19",
+        "illuminate/http": "^10.19",
+        "ext-simplexml": "*"
+    }
+}

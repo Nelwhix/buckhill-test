@@ -4,6 +4,12 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./packages/currency-exchange"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "darkaonline/l5-swagger": "^8.5",
@@ -12,6 +18,7 @@
         "laravel/tinker": "^2.8",
         "lcobucci/clock": "^3.1",
         "lcobucci/jwt": "^5.0",
+        "nelwhix/currency-exchange": "dev-main",
         "ext-openssl": "*"
     },
     "require-dev": {

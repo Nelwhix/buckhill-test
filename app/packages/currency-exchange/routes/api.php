@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 
 const CURRENCY_SOURCE = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
-Route::get('/currency', function (Request $request) {
+Route::get('/exchange', function (Request $request) {
    $amount = $request->query('amount');
    $targetCurrency = $request->query('currency');
 
@@ -38,7 +38,7 @@ Route::get('/currency', function (Request $request) {
     foreach ($cube_element as $currency_element) {
         $currency_rates[] = [
             "currency" => (string) $currency_element['currency'],
-            "rate" => (string) $currency_element['rate']
+            "rate" => (float) $currency_element['rate']
         ];
     }
 

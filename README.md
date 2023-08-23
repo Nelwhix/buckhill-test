@@ -13,6 +13,7 @@ My submission for the coding task
 - Docker Setup
 - Larastan 
 - PHP Insights
+- IDE Helpers for Models
 
 ## Setup
 - Clone the repo
@@ -76,3 +77,6 @@ you can test with
 ```bash
     docker compose run composer composer insights 
 ```
+
+## Level 3 Challenge: Currency Exchange Package
+Package is at packages/currency-exchange

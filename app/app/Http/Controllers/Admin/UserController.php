@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use OpenApi\Attributes as OA;
 
@@ -42,7 +41,7 @@ class UserController extends Controller
 
 
     #[OA\Put(
-        path: "/api/v1/admin/user-edit/{uuid} ",
+        path: "/api/v1/admin/user-edit/{uuid}",
         summary: "Edit a non-admin User account",
         security: [
             [
@@ -100,7 +99,7 @@ class UserController extends Controller
     }
 
     #[OA\Delete(
-        path: "/api/v1/admin/user-delete/{uuid} ",
+        path: "/api/v1/admin/user-delete/{uuid}",
         summary: "Delete a non-admin User account",
         security: [
             [

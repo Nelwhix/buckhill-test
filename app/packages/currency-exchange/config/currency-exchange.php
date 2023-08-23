@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'route' => "/exchange"
+    'route' => "/api/exchange"
 ];

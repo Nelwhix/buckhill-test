@@ -5,12 +5,6 @@
         "description": "petshop api",
         "version": "1.0.0"
     },
-    "servers": [
-        {
-            "url": "http://localhost:8088",
-            "description": "Petshop-api server"
-        }
-    ],
     "paths": {
         "/api/v1/admin/login": {
             "post": {
@@ -193,13 +187,13 @@
                 ]
             }
         },
-        "/api/v1/admin/user-edit/{uuid} ": {
+        "/api/v1/admin/user-edit/{uuid}": {
             "put": {
                 "tags": [
                     "Admin"
                 ],
                 "summary": "Edit a non-admin User account",
-                "operationId": "4301b2893fc85e55697e90ef8f8f7a08",
+                "operationId": "c145cc9a437560bbcd046a8edd71d228",
                 "parameters": [
                     {
                         "name": "uuid",
@@ -285,13 +279,13 @@
                 ]
             }
         },
-        "/api/v1/admin/user-delete/{uuid} ": {
+        "/api/v1/admin/user-delete/{uuid}": {
             "delete": {
                 "tags": [
                     "Admin"
                 ],
                 "summary": "Delete a non-admin User account",
-                "operationId": "cbf3a6e8a62a9c2ccf48eead5600df67",
+                "operationId": "d34b94d763c7a522daef554bac940a6c",
                 "parameters": [
                     {
                         "name": "uuid",
@@ -326,6 +320,48 @@
                 "security": [
                     {
                         "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/exchange": {
+            "get": {
+                "tags": [
+                    "Currency Exchange"
+                ],
+                "summary": "Convert from Euro to any supported currency. supported currencies: https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml",
+                "parameters": [
+                    {
+                        "name": "amount",
+                        "in": "query",
+                        "description": "amount to convert",
+                        "required": true
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "description": "currency to convert to",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "conversion success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                },
+                "servers": [
+                    {
+                        "url": "http://localhost:8088",
+                        "description": "Petshop-api server"
                     }
                 ]
             }

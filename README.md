@@ -23,8 +23,7 @@ My submission for the coding task
 
 - Start Docker network, nginx is on port 8088, php on 9000 and mysql
 on 4306, you can edit manually in the `docker-compose.yaml` or if you have
-'sed' cli installed(installed by default on most Unix-based systems)
-run 
+'sed' cli installed run 
 ```bash
     sed -i 's/8088/${desired_nginx_port}/g; s/9000:9000/${desired_php_port}:9000/g; s/4306/${desired_php_port/g' docker-compose.yaml
     

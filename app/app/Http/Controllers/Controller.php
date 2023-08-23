@@ -18,11 +18,11 @@ use Symfony\Component\HttpFoundation\Response;
     summary: "Convert from Euro to any supported currency. supported currencies: https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml",
     tags: ["Currency Exchange"],
     parameters: [
-        new OA\Parameter(name: "amount", description: "amount to convert", in: "path", required: true),
-        new OA\Parameter(name: "to", description: "currency to convert to", in: "path", required: true)
+        new OA\Parameter(name: "amount", description: "amount to convert", in: "query", required: true),
+        new OA\Parameter(name: "to", description: "currency to convert to", in: "query", required: true)
     ],
     responses: [
-        new OA\Response(response: Response::HTTP_OK, description: "conversion"),
+        new OA\Response(response: Response::HTTP_OK, description: "conversion success"),
         new OA\Response(response: Response::HTTP_BAD_REQUEST, description: "Bad Request"),
         new OA\Response(response: Response::HTTP_NOT_FOUND, description: "Not found"),
         new OA\Response(response: Response::HTTP_INTERNAL_SERVER_ERROR, description: "Server Error"),

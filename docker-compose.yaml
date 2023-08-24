@@ -27,8 +27,7 @@ services:
       GID: GID
 
   mysql:
-    platform: linux/x86_64
-    image: mysql:5.7.22
+    image: mariadb:10.6
     container_name: db
     restart: unless-stopped
     tty: true

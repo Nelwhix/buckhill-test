@@ -20,7 +20,8 @@ it('can edit a non-admin user account', function () {
       'first_name' => 'Matthew',
       'last_name' => 'Stevenson',
         'password' => 'test',
-        'password_confirmation' => 'test'
+        'password_confirmation' => 'test',
+        'marketing' => 'no'
     ];
 
     $this->withHeaders([

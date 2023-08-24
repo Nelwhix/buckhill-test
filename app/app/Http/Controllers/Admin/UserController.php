@@ -54,9 +54,6 @@ class UserController extends Controller
                     properties: [
                         new OA\Property(property: 'first_name', description: "User first name", type: "string"),
                         new OA\Property(property: 'last_name', description: "User last name", type: "string"),
-                        new OA\Property(property: 'email', description: "User email", type: "string"),
-                        new OA\Property(property: 'password', description: "User password", type: "string"),
-                        new OA\Property(property: 'password_confirmation', description: "User password confirmation", type: "string"),
                         new OA\Property(property: 'address', description: "User address", type: "string"),
                         new OA\Property(property: 'phone_number', description: "User phone number", type: "string"),
                         new OA\Property(property: 'avatar', description: "User profile picture UUID", type: "string"),
@@ -89,7 +86,13 @@ class UserController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $user->update($formFields);
+        $user->first_name = $formFields['first_name'] ?? $user->first_name;
+        $user->last_name = $formFields['last_name'] ?? $user->last_name;
+        $user->address = $formFields['address'] ?? $user->address;
+        $user->phone_number = $formFields['phone_number'] ?? $user->phone_number;
+        $user->avatar = $formFields['avatar'] ?? $user->avatar;
+        $user->is_marketing = $formFields['marketing'] === "yes" ? 1 : 0;
+        $user->save();
 
         return response([
             'status' => 'success',

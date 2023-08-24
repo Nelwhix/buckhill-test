@@ -215,18 +215,6 @@
                                         "description": "User last name",
                                         "type": "string"
                                     },
-                                    "email": {
-                                        "description": "User email",
-                                        "type": "string"
-                                    },
-                                    "password": {
-                                        "description": "User password",
-                                        "type": "string"
-                                    },
-                                    "password_confirmation": {
-                                        "description": "User password confirmation",
-                                        "type": "string"
-                                    },
                                     "address": {
                                         "description": "User address",
                                         "type": "string"
